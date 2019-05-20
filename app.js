@@ -74,11 +74,22 @@ app.use('/graphql',
           date: new Date(args.eventInput.date),
           creator: '5ce1b1053dace527ea6d896e'
         });
+        let createdEvent;
         return event
           .save()
           .then(event => {
-            // return User.findById('5ce1b1053dace527ea6d896e');
-            return event;
+            createdEvent = event;
+            return User.findById('5ce1b1053dace527ea6d896e');
+          })
+          .then(user => {
+            if (!user) {
+              throw new Error('User already exists.');
+            }
+            user.createdEvents.push(event);
+            return user.save();
+          })
+          .then(() => {
+            return createdEvent;
           })
           .catch(err => {
             console.log(err);
@@ -89,7 +100,7 @@ app.use('/graphql',
         return User.findOne({ email: args.userInput.email })
           .then(user => {
             if (user) {
-              throw new Error('User already exists.');
+              throw new Error('User doesn\'t exists.');
             }
             return bcrypt.hash(args.userInput.password, 12);
           })
