@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import './Auth.css';
+import AuthContext from '../../context/auth-context';
 
 class AuthPage extends Component {
   constructor(props) {
@@ -10,9 +11,10 @@ class AuthPage extends Component {
   }
 
   state = {
-    isLogin: true,
-
+    isLogin: true
   };
+
+  static contextType = AuthContext;
 
   submitHandler = (event) => {
     event.preventDefault();
@@ -62,8 +64,11 @@ class AuthPage extends Component {
       }
       return res.json();
     })
-    .then(json => {
-      console.log(json);
+    .then(resData => {
+      const { token, userId, tokenExpiration } = resData.data.login;
+      if (token) {
+        this.context.login(token, userId);
+      }
     })
     .catch(err => console.error(err))
   };
