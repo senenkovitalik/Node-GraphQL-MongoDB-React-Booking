@@ -11,20 +11,33 @@ const app = express();
 
 app.use(bodyParser.json());
 
+app.use((req, res, next) => {
+  res.set({
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+  });
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 app.use(isAuth);
 
 app.use('/graphql',
-    graphqlHttp({
-        schema,
-        rootValue: resolvers,
-        graphiql: true
-    }));
+  graphqlHttp({
+    schema,
+    rootValue: resolvers,
+    graphiql: true
+  }));
 
-mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0-cviiz.mongodb.net/${process.env.MONGO_DB}?retryWrites=true`, {useNewUrlParser: true})
-    .then(() => {
-        app.listen(3000, () => {
-            console.log('Start server at http://localhost:3000');
-        });
-    }).catch(err => {
-    console.log(err);
+mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0-cviiz.mongodb.net/${process.env.MONGO_DB}?retryWrites=true`, { useNewUrlParser: true })
+.then(() => {
+  const port = 3001;
+  app.listen(port, () => {
+    console.log(`Start server at http://localhost:${port}`);
+  });
+}).catch(err => {
+  console.log(err);
 });
