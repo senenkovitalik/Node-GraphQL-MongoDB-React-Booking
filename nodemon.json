@@ -4,5 +4,6 @@
     "MONGO_PASSWORD": "VihCqrSfE3e2W4bA",
     "MONGO_DB": "booking-dev",
     "JWT_PASSWORD": "someSUPERsecretKeY"
-  }
+  },
+  "ignore": ["frontend/*"]
 }
