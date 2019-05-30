@@ -24,6 +24,8 @@ class EventsPage extends Component {
     selectedEvent: null
   };
 
+  isActive = true;
+
   static contextType = AuthContext;
 
   showModal = () => {
@@ -106,6 +108,10 @@ class EventsPage extends Component {
   };
 
   fetchEvents() {
+    if (!this.isActive) {
+      return;
+    }
+
     this.setState({ isLoading: true });
 
     const requestBody = {
@@ -150,7 +156,42 @@ class EventsPage extends Component {
   }
 
   bookEvent = () => {
+    if (!this.context.token) {
+      this.setState({ selectedEvent: null });
+      return;
+    }
 
+    const requestBody = {
+      query: `
+        mutation {
+          bookEvent(eventId: "${this.state.selectedEvent._id}") {
+            _id
+            createdAt
+            updatedAt
+          }
+        }
+      `
+    };
+
+    fetch('http://localhost:3001/graphql', {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.context.token}`
+      }
+    })
+      .then(res => {
+        if (res.status !== 200 && res.status !== 201) {
+          throw new Error('Failed!')
+        }
+        return res.json();
+      })
+      .then(resData => {
+        console.log(resData);
+        this.setState({ selectedEvent: null });
+      })
+      .catch(err => console.error(err))
   };
 
   showDetailModal = eventId => {
@@ -162,6 +203,10 @@ class EventsPage extends Component {
 
   componentDidMount() {
     this.fetchEvents();
+  }
+
+  componentWillUnmount() {
+    this.isActive = false;
   }
 
   render() {
@@ -203,7 +248,7 @@ class EventsPage extends Component {
                canConfirm
                onCancel={this.hideModal}
                onConfirm={this.bookEvent}
-               confirmText="Book">
+               confirmText={this.context.token ? 'Book' : 'Confirm'}>
           <h1>{this.state.selectedEvent.title}</h1>
           <h2>${this.state.selectedEvent.price} - {new Date(this.state.selectedEvent.date).toLocaleString()}</h2>
           <p>{this.state.selectedEvent.description}</p>

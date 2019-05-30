@@ -3,10 +3,10 @@ import EventItem from './EventItem/EventItem';
 
 import './EventList.css';
 
-const eventList = ({ authUserId, onViewDetail }) => (
+const eventList = ({ events, authUserId, onViewDetail }) => (
   <ul className="events__list">
     {
-      props.events.map(event =>
+      events.map(event =>
         <EventItem key={event._id}
                    eventId={event._id}
                    title={event.title}
